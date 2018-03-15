@@ -112,7 +112,16 @@ def update_burger(id):
     burger.has_lettuce = request.json.get("has_lettuce", burger.has_lettuce)
     session.commit()
 
-    return jsonify(burger)
+    return jsonify({
+        "burger": {
+            "id": burger.id,
+            "has_cheese": burger.has_cheese,
+            "has_bun": burger.has_bun,
+            "has_patty": burger.has_patty,
+            "has_lettuce": burger.has_lettuce,
+            "has_ketchup": burger.has_ketchup,
+        }
+    }), 200
 
 
 @app.route("/burger/<int:id>", methods=["DELETE"])
