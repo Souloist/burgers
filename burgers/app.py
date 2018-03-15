@@ -4,6 +4,10 @@ import ConfigParser
 import os
 from flask import Flask
 
+from burger.models import neta
+from burger.models.burger import Burger
+
+
 config_path = os.environ.get(
     "PROD_BURGER_CONFIG",
     "examples/burgers.ini",
@@ -20,7 +24,6 @@ app.config_parsed = config
 @app.route("/burger", methods=["GET"])
 def get_burgers():
     pass
-
 
 @app.route("/burger", methods=["POST"])
 def create_burger():
