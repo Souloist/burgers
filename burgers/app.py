@@ -12,7 +12,8 @@ app = Flask(__name__)
 
 @app.route("/burger", methods=["GET"])
 def get_burgers():
-    """Returns all burgers for a given topping."""
+    """Returns all burgers for a given topping. Will return all burgers
+    if no topping is provided."""
 
     valid_toppings = (
         "has_cheese",
@@ -25,12 +26,27 @@ def get_burgers():
     topping = request.args.get("topping")
     if topping is None:
         burgers = session.query(Burger).all()
-        burger_list = {_get_burger_attributes(burger) for burger in burgers}
-
-        return burger_list
+        formatted_burgers = _format_burgers_into_dict(burgers)
+        return jsonify(formatted_burgers)
 
     if topping not in valid_toppings:
         return abort(422, {"error": "Please supply a valid topping"})
+
+    burgers_with_topping = session.execute(
+        "SELECT * FROM burgers where {} = True;".format(topping)
+    )
+
+    formatted_burgers_with_topping = _format_burgers_into_dict(burgers_with_topping)
+    return jsonify(formatted_burgers_with_topping)
+
+
+def _format_burgers_into_dict(burgers):
+    """Returns a formatted dictionary give an iterable of models.Burger instances.
+
+    :param burgers: Interable containing models.Burger instances
+
+    """
+    return {burger.id: _get_burger_attributes(burger) for burger in burgers}
 
 
 def _get_burger_attributes(burger):
@@ -41,7 +57,6 @@ def _get_burger_attributes(burger):
     """
 
     return {
-        "id": burger.id,
         "has_cheese": burger.has_cheese,
         "has_bun": burger.has_bun,
         "has_patty": burger.has_patty,
@@ -83,16 +98,7 @@ def create_burger():
     session.add(new_burger)
     session.commit()
 
-    return jsonify({
-        "burger": {
-            "id": new_burger.id,
-            "has_cheese": new_burger.has_cheese,
-            "has_bun": new_burger.has_bun,
-            "has_patty": new_burger.has_patty,
-            "has_lettuce": new_burger.has_lettuce,
-            "has_ketchup": new_burger.has_ketchup,
-        }
-    }), 201
+    return jsonify({"burger": _get_burger_attributes(new_burger)}), 201
 
 
 @app.route("/burger/<int:id>", methods=["PUT"])
@@ -112,16 +118,7 @@ def update_burger(id):
     burger.has_lettuce = request.json.get("has_lettuce", burger.has_lettuce)
     session.commit()
 
-    return jsonify({
-        "burger": {
-            "id": burger.id,
-            "has_cheese": burger.has_cheese,
-            "has_bun": burger.has_bun,
-            "has_patty": burger.has_patty,
-            "has_lettuce": burger.has_lettuce,
-            "has_ketchup": burger.has_ketchup,
-        }
-    }), 200
+    return jsonify({"burger": _get_burger_attributes(burger)}), 200
 
 
 @app.route("/burger/<int:id>", methods=["DELETE"])
