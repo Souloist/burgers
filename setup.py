@@ -7,12 +7,13 @@ from setuptools import find_packages, setup
 
 README = open(os.path.join(
     os.path.abspath(os.path.dirname(__file__)),
-    "README.rst",
+    "README.md",
 )).read()
 
 
 third_party_dependencies = [
     "flask",
+    "psycopg2",
     "requests",
     "sqlalchemy",
     "cerberus",
