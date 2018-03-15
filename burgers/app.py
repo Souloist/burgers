@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from flask import Flask, jsonify, request, abort
 from cerberus import Validator
+from distutils.util import strtobool
 
 from burgers.models.meta import session
 from burgers.models.burger import Burger
@@ -55,15 +56,15 @@ def create_burger():
     error if the request is formatted incorrectly or missing body.
     """
 
-    burger_schema = Validator({
-        "has_cheese": {"type": "string"},
-        "has_bun": {"type": "string"},
-        "has_patty": {"type": "string"},
-        "has_lettuce": {"type": "string"},
-        "has_ketchup": {"type": "string"},
-    })
-
     json = request.json
+
+    burger_schema = Validator({
+        "has_cheese": {"type": "boolean"},
+        "has_bun": {"type": "boolean"},
+        "has_patty": {"type": "boolean"},
+        "has_lettuce": {"type": "boolean"},
+        "has_ketchup": {"type": "boolean"},
+    })
 
     if not json:
         return abort(400)
@@ -72,17 +73,26 @@ def create_burger():
         return abort(422, {"error": "Missing parameters"})
 
     new_burger = Burger(
-        has_cheese=json["has_cheese"],
-        has_bun=json["has_bun"],
-        has_patty=json["has_patty"],
-        has_lettuce=json["has_lettuce"],
-        has_ketchup=json["has_ketchup"],
+        has_cheese=strtobool(json["has_cheese"]),
+        has_bun=strtobool(json["has_bun"]),
+        has_patty=strtobool(json["has_patty"]),
+        has_lettuce=strtobool(json["has_lettuce"]),
+        has_ketchup=strtobool(json["has_ketchup"]),
     )
 
     session.add(new_burger)
     session.commit()
 
-    return jsonify(new_burger)
+    return jsonify({
+        "burger": {
+            "id": new_burger.id,
+            "has_cheese": new_burger.has_cheese,
+            "has_bun": new_burger.has_bun,
+            "has_patty": new_burger.has_patty,
+            "has_lettuce": new_burger.has_lettuce,
+            "has_ketchup": new_burger.has_ketchup,
+        }
+    }), 201
 
 
 @app.route("/burger/<int:id>", methods=["PUT"])
