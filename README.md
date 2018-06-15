@@ -13,4 +13,5 @@ Then you can run the following:
 # Endpoints
 
 `/burgers/` - {GET}
+
 `/burgers/<id>` - {GET, POST, PUT, DELETE}
