@@ -9,3 +9,8 @@ Then you can run the following:
   1. `./tools/initdb.py` 
   2. `python setup.py develop`
   3. `flask run`
+
+# Endpoints
+
+`/burgers/` - {GET}
+`/burgers/<id>` - {GET, POST, PUT, DELETE}
